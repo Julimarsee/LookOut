@@ -1,5 +1,6 @@
 using UnityEngine;
 
+
 public class CameraScript : MonoBehaviour
 {
     public float sensitivityX = 2f;
