@@ -1,11 +1,15 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 public class RaycastOutline : MonoBehaviour
 {
+    public Image Scope;
+    public Sprite InteractScope;
+    public Sprite SimpleScope;
+
     [SerializeField] private Camera playerCamera;
     [SerializeField] private float outlineWidth = 10f;
-    [SerializeField] private float maxRayDistance = 3f;
-
+    private float maxRayDistance = 4f;
     private Outline lastOutlinedObject;
 
     void Update()
@@ -16,28 +20,37 @@ public class RaycastOutline : MonoBehaviour
         {
             if (hit.transform.gameObject.CompareTag("Item"))
             {
-                Outline currentOutline = hit.transform.gameObject.GetComponent<Outline>();
-
-                if (currentOutline != lastOutlinedObject)
+                if (lastOutlinedObject != null)
                 {
-                    if (lastOutlinedObject != null)
+                    lastOutlinedObject.OutlineWidth = 0;
+                    Scope.sprite = SimpleScope;
+                }
+
+                lastOutlinedObject = hit.transform.gameObject.GetComponent<Outline>();
+                lastOutlinedObject.OutlineWidth = outlineWidth;
+                Scope.sprite = InteractScope;
+
+                if (Input.GetMouseButtonDown(0))
+                {
+                    IInteractable[] interactables = lastOutlinedObject.GetComponents<IInteractable>();
+                    
+                    foreach (var interactable in interactables)
                     {
-                        lastOutlinedObject.enabled = false;
+                        interactable.Interact();
                     }
-
-                    currentOutline.OutlineMode = Outline.Mode.OutlineVisible;
-                    currentOutline.OutlineWidth = outlineWidth;
-
-                    currentOutline.enabled = true;
-
-                    lastOutlinedObject = currentOutline;
                 }
             }
-        }
-        else if (lastOutlinedObject != null)
-        {
-            lastOutlinedObject.enabled = false;
-            lastOutlinedObject = null;
+            else if (lastOutlinedObject != null)
+            {
+                Scope.sprite = SimpleScope;
+                lastOutlinedObject.OutlineWidth = 0;
+                lastOutlinedObject = null;
+            }
         }
     }
+}
+
+public interface IInteractable
+{
+    void Interact();
 }
