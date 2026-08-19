@@ -10,7 +10,8 @@ public class RaycastOutline : MonoBehaviour
     [SerializeField] private Camera playerCamera;
     [SerializeField] private float outlineWidth = 10f;
     private float maxRayDistance = 4f;
-    private Outline lastOutlinedObject;
+    
+    public Outline lastOutlinedObject;
 
     void Update()
     {

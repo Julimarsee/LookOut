@@ -2628,7 +2628,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   targetObject: {fileID: 2056031051}
-  cameraScript: {fileID: 0}
+  cameraScript: {fileID: 543387175}
 --- !u!43 &295778486
 Mesh:
   m_ObjectHideFlags: 0

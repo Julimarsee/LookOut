@@ -7,9 +7,6 @@ public class ComputerCameras : MonoBehaviour, IInteractable
 
     public void Interact()
     {
-        if (cameraScript.IsAtTarget())
-            cameraScript.ReturnToStart();
-        else
-            cameraScript.MoveToObject(targetObject);
+        cameraScript.ZoomToObject(targetObject);
     }
 }

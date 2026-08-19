@@ -12,16 +12,26 @@ public class CameraScript : MonoBehaviour
 
     [Header("Movement Settings")]
     public float moveSpeed = 5f;
-    public bool lockControlsWhileMoving = true; 
+    public bool lockControlsWhileMoving = true;
+
+    [Header("Zoom Settings")]
+    public bool disableRotationWhenZoomed = true;
+
     private float rotationX = 0f;
     private float rotationY = 0f;
 
     private Vector3 startPosition;
-    private Vector3 targetPosition;
     private Quaternion startRotation;
+
+    private Vector3 previousPosition;
+    private Quaternion previousRotation;
+
+    private Vector3 targetPosition;
     private Quaternion targetRotation;
+
     private bool isMoving = false;
     private bool isAtTarget = false;
+    private bool isRotationLocked = false;
 
     void Start()
     {
@@ -34,13 +44,29 @@ public class CameraScript : MonoBehaviour
 
         startPosition = transform.position;
         startRotation = transform.rotation;
+
+        previousPosition = startPosition;
+        previousRotation = startRotation;
+
         targetPosition = transform.position;
         targetRotation = transform.rotation;
     }
 
     void Update()
     {
-        if (!isMoving || !lockControlsWhileMoving)
+        if (Input.GetKeyDown(KeyCode.Escape) && isAtTarget)
+        {
+            ReturnToPreviousPosition();
+        }
+
+        bool canRotate = !isMoving || !lockControlsWhileMoving;
+
+        if (disableRotationWhenZoomed && isAtTarget && !isMoving)
+        {
+            canRotate = false;
+        }
+
+        if (canRotate)
         {
             float mouseX = Input.GetAxis("Mouse X") * sensitivityX;
             float mouseY = Input.GetAxis("Mouse Y") * sensitivityY;
@@ -73,6 +99,11 @@ public class CameraScript : MonoBehaviour
                 transform.position = targetPosition;
                 transform.rotation = targetRotation;
                 isMoving = false;
+
+                if (disableRotationWhenZoomed && isAtTarget)
+                {
+                    isRotationLocked = true;
+                }
             }
         }
     }
@@ -81,6 +112,12 @@ public class CameraScript : MonoBehaviour
     {
         if (targetObject == null)
             return;
+
+        previousPosition = transform.position;
+        previousRotation = transform.rotation;
+
+        Vector3 currentAngles = transform.eulerAngles;
+        previousRotation = Quaternion.Euler(currentAngles.x, currentAngles.y, 0f);
 
         MoveToPosition(targetObject.position, targetObject.rotation);
     }
@@ -91,14 +128,28 @@ public class CameraScript : MonoBehaviour
         targetRotation = rotation;
         isMoving = true;
         isAtTarget = true;
+        isRotationLocked = false;
     }
 
-    public void ReturnToStart()
+    public void ReturnToPreviousPosition()
     {
-        targetPosition = startPosition;
-        targetRotation = startRotation;
+        targetPosition = previousPosition;
+        targetRotation = previousRotation;
         isMoving = true;
         isAtTarget = false;
+        isRotationLocked = false;
+
+        Vector3 angles = previousRotation.eulerAngles;
+        rotationX = angles.x;
+        rotationY = angles.y;
+    }
+
+    public void ZoomToObject(Transform targetObject)
+    {
+        if (IsAtTarget())
+            ReturnToPreviousPosition();
+        else
+            MoveToObject(targetObject);
     }
 
     public bool IsAtTarget()
